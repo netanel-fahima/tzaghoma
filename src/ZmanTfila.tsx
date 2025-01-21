@@ -8,7 +8,6 @@ interface ZmanTfilaProps {
   times: any[];
   containerRef: any;
   className?: string;
-  defaultPosition: any;
 }
 
 const ZmanTfila: React.FC<ZmanTfilaProps> = ({
@@ -17,21 +16,19 @@ const ZmanTfila: React.FC<ZmanTfilaProps> = ({
   containerRef,
   className,
   dragKey,
-  defaultPosition,
 }) => {
   return (
-    <DraggableText id={dragKey} defaultPosition={defaultPosition}>
+    <DraggableText id={dragKey}>
       <div className="Columns">
         <ResponsiveText
-          defaultFontSize="60"
+          id={`${dragKey}-Title`}
           className={className}
           title={title}
           containerRef={containerRef}
         />
-
         <ResponsiveText
+          id={`${dragKey}-Times`}
           containerRef={containerRef}
-          defaultFontSize="90"
           title={
             <div className="Columns NoWrap">
               {times.map((item, index) => (

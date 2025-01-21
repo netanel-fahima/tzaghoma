@@ -1,3 +1,5 @@
+import "react-contexify/dist/ReactContexify.css";
+
 import "./App.css";
 import Header from "./Header";
 import axios from "axios";
@@ -7,7 +9,6 @@ import ResponsiveText from "./components/ResponsiveText/ResponsiveText";
 import DraggableText from "./components/DraggableText/DraggableText";
 import ZmanTfila from "./ZmanTfila";
 import HodatHerum from "./HodatHerum";
-import useDimensions from "./hooks/useDimensions";
 
 const isLandscapeMobile = (): boolean => {
   return window.matchMedia("only screen  and  (orientation: landscape)")
@@ -21,19 +22,7 @@ const isRealMobile = (): boolean => {
 function App(props: any) {
   const [holtTimes, setHolTimes] = useState<{ Desc: string; Hour: string }[]>([
     { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
-    { Desc: "שחרית", Hour: "8:00" },
   ]);
-
-  const { maxX, maxY, width, height } = useDimensions();
-
-  const isLandscape = width < height;
 
   const [shabatTimes, setShabatTimes] = useState<
     { Desc: string; Hour: string }[]
@@ -49,16 +38,6 @@ function App(props: any) {
   );
 
   const [showAlert, setShowAlert] = useState(false);
-
-  // useEffect(() => {
-  //   if (isLandscapeMobile() && isRealMobile() && !showAlert) {
-  //     alert("נא לבטל מצב סיבוב אוטומטי בהגדרות המכשיר");
-  //     setShowAlert(true);
-  //   }
-  //   if (!isLandscapeMobile() && isRealMobile() && showAlert) {
-  //     setShowAlert(false);
-  //   }
-  // }, [isLandscape]);
 
   const [bgImage, setBgImage] = useState(
     "https://a-digital.co.il/images/bg_images/4win_bg_with_footer.jpg"
@@ -158,7 +137,7 @@ function App(props: any) {
     updateData();
     const interval = setInterval(() => {
       updateData();
-    }, 10000);
+    }, 3600000);
 
     return () => {
       clearInterval(interval);
@@ -171,15 +150,9 @@ function App(props: any) {
     <div className="App" ref={containerRef}>
       <Header container={containerRef} />
 
-      <DraggableText
-        id="SynName"
-        defaultPosition={{
-          mobile: { x: 294, y: 319 },
-          desktop: { x: 571, y: 86 },
-        }}
-      >
+      <DraggableText id="SynName">
         <ResponsiveText
-          defaultFontSize="35"
+          id="SynName"
           className="SynName"
           title={synName}
           containerRef={containerRef}
@@ -192,20 +165,13 @@ function App(props: any) {
         title={title2}
         times={shabatTimes}
         containerRef={containerRef}
-        defaultPosition={{
-          mobile: { x: 194, y: 40 },
-          desktop: { x: 69, y: 116 },
-        }}
       />
 
-      <DraggableText
-        id="Sponsored"
-        defaultPosition={{ mobile: { x: 0, y: 0 }, desktop: { x: 11, y: 680 } }}
-      >
+      <DraggableText id="Sponsored">
         <div className="Row">
           <img src={imgLeftFooter} className="logo" width={70} height={40} />
           <ResponsiveText
-            defaultFontSize="110"
+            id="Sponsored"
             className="Sponsored"
             title={textLeftFooter}
             containerRef={containerRef}
@@ -219,28 +185,18 @@ function App(props: any) {
         title={title1}
         times={holtTimes}
         containerRef={containerRef}
-        defaultPosition={{
-          mobile: { x: 257, y: 611 },
-          desktop: { x: 1075, y: 112 },
-        }}
       />
 
-      <DraggableText
-        id="Messages"
-        defaultPosition={{
-          mobile: { x: 78, y: 56 },
-          desktop: { x: 68, y: 477 },
-        }}
-      >
+      <DraggableText id="Messages">
         <ResponsiveText
-          defaultFontSize="70"
+          id="Messages-Title"
           className="AreaTitle"
           title={title4}
           containerRef={containerRef}
         />
 
         <ResponsiveText
-          defaultFontSize="85"
+          id="Messages-Text"
           className="AreaMessageText"
           title={
             <div className="Columns">
@@ -253,22 +209,16 @@ function App(props: any) {
         />
       </DraggableText>
 
-      <DraggableText
-        id="Notes"
-        defaultPosition={{
-          mobile: { x: 49, y: 613 },
-          desktop: { x: 1070, y: 477 },
-        }}
-      >
+      <DraggableText id="Notes">
         <ResponsiveText
-          defaultFontSize="70"
+          id="Notes-Title"
           className="AreaTitle"
           title={title3}
           containerRef={containerRef}
         />
 
         <ResponsiveText
-          defaultFontSize="90"
+          id="Notes-Text"
           className="AreaMessageText"
           title={
             <div className="Columns" style={{ marginTop: 8 }}>
@@ -282,15 +232,9 @@ function App(props: any) {
       </DraggableText>
 
       {isCanEditFooter && (
-        <DraggableText
-          id="BottomTitle"
-          defaultPosition={{
-            desktop: { x: 767, y: 108 },
-            mobile: { x: 0, y: 0 },
-          }}
-        >
+        <DraggableText id="BottomTitle">
           <ResponsiveText
-            defaultFontSize="35"
+            id="BottomTitle"
             className="BottomTitle"
             title={textRightFooter}
             containerRef={containerRef}

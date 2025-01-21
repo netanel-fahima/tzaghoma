@@ -24,7 +24,7 @@ const HodatHerum = ({ cityCode, cityName , container }) => {
             } catch (error) {
                 console.error("error in hodat herum interval" + error);
             }
-        }, 3000);
+        }, 4000);
 
         return () => clearInterval(interval);
     }, [cityCode]);
@@ -60,7 +60,7 @@ const HodatHerum = ({ cityCode, cityName , container }) => {
             </span>
             <marquee width="80%" direction="left" style={{ fontSize: "20px", fontWeight: "bolder", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
             <ResponsiveText
-                defaultFontSize="35"
+                id="HodatHerum"
                 title={message}
                 containerRef={container}
                 />

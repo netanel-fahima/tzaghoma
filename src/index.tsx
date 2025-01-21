@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import configData1 from "./conf/defaultDragFrames.json";
+import configData2 from "./conf/defaultTextStyle.json";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
@@ -16,6 +18,31 @@ if (rootElement) {
 
     console.log(synIdParam);
   }
+
+  const getJson = (key: string) => {
+    try {
+      var value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  // פונקציה לאתחול ה-local storage
+  const initializeLocalStorage = (configData: { [key: string]: any }) => {
+    console.log("initializeLocalStorage");
+    Object.keys(configData).forEach((key) => {
+      localStorage.setItem(
+        key,
+        JSON.stringify({ ...configData[key], ...getJson(key) })
+      );
+    });
+  };
+
+  // אתחול עבור כל קובץ קונפיגורציה
+  initializeLocalStorage(configData1);
+  initializeLocalStorage(configData2);
+  // קריאה לפונקציה עבור כל קובץ נוסף
 
   root.render(
     <React.StrictMode>

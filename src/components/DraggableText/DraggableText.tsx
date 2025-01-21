@@ -14,6 +14,8 @@ const isRealMobile = (): boolean => {
   return /Mobi|Android/i.test(navigator.userAgent);
 };
 
+const localStorageKeyPrefix = "draggable-text-";
+
 // הגדרת טיפוס למצב הפוזיציה
 interface Position {
   mobile: { x: number; y: number; width?: number; height?: number };
@@ -24,20 +26,19 @@ interface DraggableTextProps {
   children: any;
   id?: string;
   user?: string;
-  defaultPosition?: Position;
 }
 
-const DraggableText: React.FC<DraggableTextProps> = ({
-  children,
-  id,
-  defaultPosition = {
-    mobile: { x: 0, y: 0, width: 0, height: 0 },
-    desktop: { x: 0, y: 0, width: 0, height: 0 },
-  },
-}) => {
+const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
   const getInitialPosition = (): Position => {
-    const savedPosition = id ? localStorage.getItem(id) : null;
-    let position = savedPosition ? JSON.parse(savedPosition) : defaultPosition;
+    const savedPosition = id
+      ? localStorage.getItem(localStorageKeyPrefix + id)
+      : null;
+    let position = savedPosition
+      ? JSON.parse(savedPosition)
+      : {
+          mobile: { x: 0, y: 0, width: 0, height: 0 },
+          desktop: { x: 0, y: 0, width: 0, height: 0 },
+        };
     return position;
   };
 
@@ -53,6 +54,25 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     width: 0,
     height: 0,
   });
+
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  const handleDragStart = (e: any) => {
+    if (escapePressed) {
+      return;
+    }
+
+    setIsDragging(true);
+    // Create an invisible image (transparent GIF)
+    if (ref.current) {
+      //@ts-ignore
+      const rect = ref.current.getBoundingClientRect();
+      setOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
 
   const handleDrag = (
     e: React.DragEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
@@ -72,17 +92,33 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     if (clientX === 0 && clientY === 0) return; // אין עדכון אם הקורדינטות הן 0,0
     const newPosition = isPortraitMobile()
       ? {
-          mobile: { ...position.mobile, x: clientX, y: clientY },
+          mobile: {
+            ...position.mobile,
+            x: clientX - offset.x,
+            y: clientY - offset.y,
+          },
           desktop: position.desktop,
         }
       : {
           mobile: position.mobile,
-          desktop: { ...position.desktop, x: clientX, y: clientY },
+          desktop: {
+            ...position.desktop,
+            x: clientX - offset.x,
+            y: clientY - offset.y,
+          },
         };
+
+    // if (ref.current) {
+    //   //@ts-ignore
+    //   e?.dataTransfer?.setDragImage(ref.current, 0, 0);
+    // }
 
     setPosition(newPosition);
     if (id) {
-      localStorage.setItem(id, JSON.stringify(newPosition)); // שמירת המיקום ב-localStorage
+      localStorage.setItem(
+        localStorageKeyPrefix + id,
+        JSON.stringify(newPosition)
+      ); // שמירת המיקום ב-localStorage
     }
   };
 
@@ -97,23 +133,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     );
 
     setIsDragging(false);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDragStart = (event: any) => {
-    if (escapePressed) {
-      return;
-    }
-
-    setIsDragging(true);
-    // Create an invisible image (transparent GIF)
-    const transparentImg = new Image();
-    transparentImg.src =
-      "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; // A 1x1 pixel transparent GIF
-    event.dataTransfer.setDragImage(transparentImg, 0, 0); // Setting the drag image
   };
 
   useEffect(() => {
@@ -166,24 +185,43 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   }, []);
 
   //@ts-ignore
-  const onResize = (event, { node, size, handle }) => {
+  const onResize = (event, { size, handle }) => {
     const { width, height } = size;
+    const isLeft = handle === "sw";
 
-    const newPosition = isPortraitMobile()
-      ? {
-          mobile: { ...position.mobile, width, height },
-          desktop: position.desktop,
-        }
-      : {
-          mobile: position.mobile,
-          desktop: { ...position.desktop, width, height },
-        };
+    setPosition((position) => {
+      const newPosition = isPortraitMobile()
+        ? {
+            mobile: {
+              ...position.mobile,
+              width,
+              height,
+              x:
+                position.mobile.x +
+                (isLeft ? (position.mobile.width ?? 0) - width : 0),
+            },
+            desktop: position.desktop,
+          }
+        : {
+            mobile: position.mobile,
+            desktop: {
+              ...position.desktop,
+              width,
+              height,
+              x:
+                position.desktop.x +
+                (isLeft ? (position.desktop.width ?? 0) - width : 0),
+            },
+          };
 
-    setPosition(newPosition);
-
-    if (id) {
-      localStorage.setItem(id, JSON.stringify(newPosition)); // שמירת המיקום ב-localStorage
-    }
+      if (id) {
+        localStorage.setItem(
+          localStorageKeyPrefix + id,
+          JSON.stringify(newPosition)
+        );
+      }
+      return newPosition;
+    });
   };
 
   useLayoutEffect(() => {
@@ -207,18 +245,12 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   }, [width, height, position, escapePressed, isLandscape]);
 
   let currentPosition = isPortraitMobile() ? position.mobile : position.desktop;
-  const titleWidth = (children?.props?.title?.length || 15) * (width * 0.005);
-  const left = Math.min(
-    currentPosition.x,
-    maxX - (isLandscape ? 10 : titleWidth)
-  );
-  const top = Math.min(
-    currentPosition.y,
-    maxY - (isLandscape ? titleWidth : 10)
-  );
 
-  const dragHeight = position.desktop.height || initialSize.height;
-  const dragWidth = position.desktop.width || initialSize.width;
+  const dragHeight = currentPosition.height || initialSize.height;
+  const dragWidth = currentPosition.width || initialSize.width;
+
+  const left = Math.min(Math.max(currentPosition.x, 0), maxX - dragWidth);
+  const top = Math.min(Math.max(currentPosition.y, 0), maxY - dragHeight);
 
   return (
     <div
@@ -245,11 +277,11 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     >
       {initialSize.height || initialSize.height ? (
         <ResizableBox
-          {...(!escapePressed ? { resizeHandles: [] } : {})}
+          resizeHandles={!escapePressed ? [] : ["se", "sw"]}
           style={{
             background:
               escapePressed || isDragging
-                ? "rgba(255, 255, 255, 0.5)"
+                ? "rgba(255, 255, 255, 0.25)"
                 : "unset",
           }}
           minConstraints={[50, 50]}
@@ -257,6 +289,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
           height={dragHeight}
           width={dragWidth}
           onResize={onResize}
+          onResizeStart={(e: any) => e.stopPropagation()}
         >
           <div
             style={{
@@ -270,10 +303,10 @@ const DraggableText: React.FC<DraggableTextProps> = ({
                 {`
               @keyframes marquee-vertical {
                 0% {
-                top: ${initialSize.height}px;
+                top: ${dragHeight}px;
                 }
                 100% {
-                top: -${initialSize.height}px;
+                top: -${dragHeight}px;
                 }
               }
               `}

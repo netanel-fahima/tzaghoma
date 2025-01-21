@@ -10,14 +10,11 @@ const Header = ({ container }) => {
   const parasha = getParasha();
 
   return (
-    <DraggableText
-      id="Header"
-      defaultPosition={{"mobile":{"x":85,"y":328},"desktop":{"x":575,"y":249}}}
-    >
+    <DraggableText id="Header">
       <div className='Columns'>
         <Clock container={container} />
         <ResponsiveText
-          defaultFontSize="30"
+          id="Header-Title"
           className="MessagesTitle"
           title={
             <div className='Columns Parasha' style={{ gap: '0' }}>
@@ -28,14 +25,14 @@ const Header = ({ container }) => {
           containerRef={container}
         />
         <ResponsiveText
+          id="Header-HebDate"
           containerRef={container}
-          defaultFontSize="60"
           className="HebDate"
           title={hebDate}
         />
         <ResponsiveText
+          id="Header-EngDate"
           containerRef={container}
-          defaultFontSize="55"
           className="EngDate"
           title={engDate}
         />

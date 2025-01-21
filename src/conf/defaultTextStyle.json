@@ -1,0 +1,21 @@
+{
+  "style-Clock": { "fontSize": 2.8 },
+  "style-Header-Title": { "fontSize": 3.4, "fontFamily": "FbLivorna" },
+  "style-Header-HebDate": { "fontSize": 1.7 },
+  "style-Header-EngDate": { "fontSize": 1.8, "fontFamily": "FbLivorna" },
+  "style-SynName": { "fontSize": 3, "fontFamily": "FbLivorna" },
+  "style-Area-Title": { "fontSize": 1.6 },
+  "style-Area-Times": { "fontSize": 1.1 },
+  "style-Sponsored": {
+    "fontSize": 0.9,
+    "fontFamily": "David",
+    "lineHeight": 1.3
+  },
+  "style-ZmanTfila-Title": { "fontSize": 1.6 },
+  "style-ZmanTfila-Times": { "fontSize": 1.1 },
+  "style-Messages-Title": { "fontSize": 1.4 },
+  "style-Messages-Text": { "fontSize": 1.2 },
+  "style-Notes-Title": { "fontSize": 1.4 },
+  "style-Notes-Text": { "fontSize": 1.2 },
+  "style-HodatHerum": { "fontSize": 2.3 }
+}
