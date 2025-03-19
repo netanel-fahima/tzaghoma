@@ -212,7 +212,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
           if (position.desktop.height === 0) {
             return;
           }
-          console.log(scrollHeight, clientHeight, position.desktop.height);
           setHasOverflow(scrollHeight > clientHeight);
         }
       }, 2000);

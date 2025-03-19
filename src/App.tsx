@@ -9,6 +9,7 @@ import ResponsiveText from "./components/ResponsiveText/ResponsiveText";
 import DraggableText from "./components/DraggableText/DraggableText";
 import ZmanTfila from "./ZmanTfila";
 import HodatHerum from "./HodatHerum";
+import AlertPopup from "./components/AlertPopup/AlertPopup";
 
 const isLandscapeMobile = (): boolean => {
   return window.matchMedia("only screen  and  (orientation: landscape)")
@@ -265,6 +266,7 @@ function App(props: any) {
         cityName={cityName}
         container={containerRef}
       />
+      {/* <AlertPopup /> */}
     </div>
   );
 }
