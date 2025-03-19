@@ -33,7 +33,7 @@ const ResponsiveText: React.FC<{
     >
       <div
         className={`ResponsiveText ${className}`}
-        style={{ ...style, fontSize: `clamp(1rem,${style.fontSize}vw, 5rem)` }}
+        style={{ ...style, fontSize: `clamp(1rem,${style?.fontSize}vw, 5rem)` }}
       >
         {title}
       </div>

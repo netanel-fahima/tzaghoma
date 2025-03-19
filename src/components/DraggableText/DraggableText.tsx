@@ -3,12 +3,7 @@ import useDimensions from "../../hooks/useDimensions";
 // ES6
 //@ts-ignore
 import { ResizableBox } from "react-resizable";
-
-const isPortraitMobile = (): boolean => {
-  return window.matchMedia(
-    "only screen and (max-width: 768px) and (orientation: portrait) "
-  ).matches;
-};
+import Draggable, { DraggableCore } from "react-draggable"; // Both at the same time
 
 const isRealMobile = (): boolean => {
   return /Mobi|Android/i.test(navigator.userAgent);
@@ -58,10 +53,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const handleDragStart = (e: any) => {
-    if (escapePressed) {
-      return;
-    }
-
     setIsDragging(true);
     // Create an invisible image (transparent GIF)
     if (ref.current) {
@@ -74,12 +65,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
     }
   };
 
-  const handleDrag = (
-    e: React.DragEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
-  ) => {
-    if (escapePressed) {
-      return;
-    }
+  const handleDrag = (e: any) => {
     const clientX =
       e.type === "touchmove"
         ? (e as React.TouchEvent).touches[0].clientX
@@ -89,8 +75,8 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
         ? (e as React.TouchEvent).touches[0].clientY
         : (e as React.DragEvent).clientY;
 
-    if (clientX === 0 && clientY === 0) return; // אין עדכון אם הקורדינטות הן 0,0
-    const newPosition = isPortraitMobile()
+    if (clientX === 0 || clientY === 0) return; // אין עדכון אם הקורדינטות הן 0,0
+    const newPosition = isRealMobile()
       ? {
           mobile: {
             ...position.mobile,
@@ -108,11 +94,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
           },
         };
 
-    // if (ref.current) {
-    //   //@ts-ignore
-    //   e?.dataTransfer?.setDragImage(ref.current, 0, 0);
-    // }
-
     setPosition(newPosition);
     if (id) {
       localStorage.setItem(
@@ -122,12 +103,8 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
     }
   };
 
-  const handleDragEnd = (
-    e: React.DragEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
-  ) => {
-    const currentPosition = isPortraitMobile()
-      ? position.mobile
-      : position.desktop;
+  const handleDragEnd = (e: any) => {
+    const currentPosition = isRealMobile() ? position.mobile : position.desktop;
     console.log(
       `Final position - x: ${currentPosition.x}, y: ${currentPosition.y}`
     );
@@ -158,7 +135,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
         for (let entry of entries) {
           const { width, height } = entry.contentRect;
           if (!s.width && !s.height) {
-            s = isPortraitMobile()
+            s = isRealMobile()
               ? {
                   width: width,
                   height: height,
@@ -187,10 +164,13 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
   //@ts-ignore
   const onResize = (event, { size, handle }) => {
     const { width, height } = size;
+
+    if (width === 0 || height === 0) return;
+
     const isLeft = handle === "sw";
 
     setPosition((position) => {
-      const newPosition = isPortraitMobile()
+      const newPosition = isRealMobile()
         ? {
             mobile: {
               ...position.mobile,
@@ -229,6 +209,10 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
       setTimeout(() => {
         if (ref.current) {
           const { scrollHeight, clientHeight } = ref.current;
+          if (position.desktop.height === 0) {
+            return;
+          }
+          console.log(scrollHeight, clientHeight, position.desktop.height);
           setHasOverflow(scrollHeight > clientHeight);
         }
       }, 2000);
@@ -244,7 +228,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
     return () => window.removeEventListener("resize", checkOverflow);
   }, [width, height, position, escapePressed, isLandscape]);
 
-  let currentPosition = isPortraitMobile() ? position.mobile : position.desktop;
+  let currentPosition = isRealMobile() ? position.mobile : position.desktop;
 
   const dragHeight = currentPosition.height || initialSize.height;
   const dragWidth = currentPosition.width || initialSize.width;
@@ -257,17 +241,10 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
       className="DraggableText"
       ref={ref}
       id={id}
-      draggable={!escapePressed && !isRealMobile()}
-      onDrag={handleDrag}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      // onTouchStart={handleTouchStart}
-      // onTouchMove={handleDrag}
-      // onTouchEnd={handleDragEnd}
       style={{
         left: `${isLandscape ? top : left}px`,
         [isLandscape ? "bottom" : "top"]: `${isLandscape ? left : top}px`,
-        cursor: escapePressed ? "ew-resize" : "grab",
+        cursor: "grab",
         zIndex: 100,
         position: "absolute",
         border: escapePressed ? "dashed 1px #000 " : "unset",
@@ -275,32 +252,41 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
         overflow: "hidden",
       }}
     >
-      {initialSize.height || initialSize.height ? (
-        <ResizableBox
-          resizeHandles={!escapePressed ? [] : ["se", "sw"]}
-          style={{
-            background:
-              escapePressed || isDragging
-                ? "rgba(255, 255, 255, 0.25)"
-                : "unset",
-          }}
-          minConstraints={[50, 50]}
-          maxConstraints={[500, 500]}
-          height={dragHeight}
-          width={dragWidth}
-          onResize={onResize}
-          onResizeStart={(e: any) => e.stopPropagation()}
-        >
-          <div
+      <Draggable
+        defaultClassName="Draggables"
+        bounds="parent"
+        disabled={isRealMobile()}
+        onStart={handleDragStart}
+        onDrag={handleDrag}
+        onStop={handleDragEnd}
+      >
+        {initialSize.height || initialSize.height ? (
+          <ResizableBox
+            className="handle"
+            resizeHandles={!escapePressed ? [] : ["se", "sw"]}
             style={{
-              position: "relative",
+              background:
+                escapePressed || isDragging
+                  ? "rgba(255, 255, 255, 0.25)"
+                  : "unset",
             }}
-            className={`drag-children ${hasOverflow ? "scrolling-text" : ""}`}
+            minConstraints={[50, 50]}
+            maxConstraints={[500, 500]}
+            height={dragHeight}
+            width={dragWidth}
+            onResize={onResize}
+            onResizeStart={(e: any) => e.stopPropagation()}
           >
-            {children}
-            {hasOverflow && !isRealMobile() && (
-              <style>
-                {`
+            <div
+              style={{
+                position: "relative",
+              }}
+              className={`drag-children ${hasOverflow ? "scrolling-text" : ""}`}
+            >
+              {children}
+              {hasOverflow && !isRealMobile() && (
+                <style>
+                  {`
               @keyframes marquee-vertical {
                 0% {
                 top: ${dragHeight}px;
@@ -310,13 +296,14 @@ const DraggableText: React.FC<DraggableTextProps> = ({ children, id }) => {
                 }
               }
               `}
-              </style>
-            )}
-          </div>
-        </ResizableBox>
-      ) : (
-        <>{children}</>
-      )}
+                </style>
+              )}
+            </div>
+          </ResizableBox>
+        ) : (
+          <>{children}</>
+        )}
+      </Draggable>
     </div>
   );
 };

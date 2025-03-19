@@ -27,6 +27,20 @@ html {
   width: 100vw;
   overflow: hidden; /* Ensure no overflow from the pseudo-element */
 }
+.Draggables {
+  position: relative;
+  transform: unset !important;
+}
+
+.DraggableText {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.handle {
+}
 
 .App {
   content: "";

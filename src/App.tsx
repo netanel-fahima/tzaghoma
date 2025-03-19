@@ -233,20 +233,30 @@ function App(props: any) {
 
       {isCanEditFooter && (
         <DraggableText id="BottomTitle">
-          <ResponsiveText
-            id="BottomTitle"
-            className="BottomTitle"
-            title={textRightFooter}
-            containerRef={containerRef}
-          />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <ResponsiveText
+              id="BottomTitle"
+              className="BottomTitle"
+              title={textRightFooter}
+              containerRef={containerRef}
+            />
 
-          <img
-            src={imgRightFooter}
-            className="logo"
-            alt=""
-            width={160}
-            height={50}
-          />
+            <img
+              style={{ marginTop: -7 }}
+              src={imgRightFooter}
+              className="logo"
+              alt=""
+              width={160}
+              height={50}
+            />
+          </div>
         </DraggableText>
       )}
 

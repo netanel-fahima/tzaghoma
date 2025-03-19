@@ -17,5 +17,6 @@
   "style-Messages-Text": { "fontSize": 1.2 },
   "style-Notes-Title": { "fontSize": 1.4 },
   "style-Notes-Text": { "fontSize": 1.2 },
-  "style-HodatHerum": { "fontSize": 2.3 }
+  "style-HodatHerum": { "fontSize": 2.3 },
+  "style-BottomTitle": { "fontSize": 1.1 }
 }
